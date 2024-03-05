@@ -16,14 +16,14 @@ use TYPO3\CMS\Core\Cache\CacheManager;
 class SlugsUtility
 {
     protected $table = 'pages';
-  
+
     protected $slugFieldName = 'slug';
     protected $slugLockedFieldName = 'slug_locked';
     protected $fieldNamesToShow = ['title'];
     protected $countUpdates =0;
     protected $maxDepth =100;
     protected $siteLanguagesIds=[];
-
+    protected $slugUtility;
 
     /**
      * Instantiate the form protection before a simulated user is initialized.
@@ -32,8 +32,7 @@ class SlugsUtility
      */
     public function __construct(array $siteLanguages)
     {
-        $this->siteLanguages = $siteLanguages;
-        foreach ($this->siteLanguages as $language) {
+        foreach ($siteLanguages as $language) {
             $this->siteLanguagesIds[]=$language->getLanguageId();
         }
     }
@@ -49,7 +48,7 @@ class SlugsUtility
     {
         $this->table=$table;
     }
-  
+
     public function setSlugFieldName($slugFieldName)
     {
         $this->slugFieldName=$slugFieldName;
@@ -62,7 +61,7 @@ class SlugsUtility
     {
         $this->fieldNamesToShow=$fieldNamesToShow;
     }
-  
+
     public function populateSlugsAll(int $lang=null)
     {
         $this->doSlugsAll(true, $lang);
@@ -106,7 +105,7 @@ class SlugsUtility
         }
         $this->maxDepth=$maxDepth;
         $this->countUpdates=0;
-      
+
         $entries=[];
 
         $this->slugUtility = GeneralUtility::makeInstance(SlugUtility::class, $this->table, $this->slugFieldName, $this->slugLockedFieldName, $this->fieldNamesToShow);
@@ -154,7 +153,7 @@ class SlugsUtility
 
 
 
-  
+
     /**
      * Fills the database table with slugs based on the slug fields and its configuration.
      */
@@ -189,7 +188,7 @@ class SlugsUtility
     }
 
 
-  
+
     /**
      * Fills the database table with slugs based on the slug fields and its configuration.
      */
@@ -217,7 +216,7 @@ class SlugsUtility
 
 
 
-  
+
     public function getSlugFields()
     {
         $fields=[];
@@ -242,7 +241,7 @@ class SlugsUtility
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-    
+
         $queryBuilder->select('*')
             ->from($this->table);
         if ($this->table=='pages') {
@@ -305,14 +304,14 @@ class SlugsUtility
             ->addOrderBy('sorting', 'asc')
             ->execute();
     }
-  
+
 
     protected function getStatementAll(int $lang=null)
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-    
+
         $queryBuilder->select('*')
             ->from($this->table);
         // only show entries with the correct language
@@ -328,7 +327,7 @@ class SlugsUtility
         if ($GLOBALS['TCA'][$this->table]['ctrl']['sortby']) {
             $queryBuilder->addOrderBy($GLOBALS['TCA'][$this->table]['ctrl']['sortby'], 'asc');
         }
-        
+
         return $queryBuilder->execute();
     }
 
@@ -375,7 +374,7 @@ class SlugsUtility
 
 
 
-  
+
     public function getPageRecordsRecursive(int $pid, int $depth, array $rows = []): array
     {
         $depth--;
@@ -392,11 +391,11 @@ class SlugsUtility
                 $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)),
                 $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW)
             );
-      
+
         if (!empty($GLOBALS['TCA']['pages']['ctrl']['sortby'])) {
             $queryBuilder->orderBy($GLOBALS['TCA']['pages']['ctrl']['sortby']);
         }
-      
+
         if ($depth >= 0) {
             $result = $queryBuilder->execute();
             $rowCount = $queryBuilder->count('uid')->execute()->fetchColumn(0);

@@ -26,6 +26,14 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
 {
     protected $search=[];
     protected $depth=0; // get from .....
+    protected $id;
+    protected $siteLanguages;
+    protected $slugsUtility;
+    protected $slugTables;
+    protected $perms_clause;
+    protected $slugTable;
+    protected $activeTable;
+    protected $lang;
 
     /**
      * Initializes the backend module by setting internal variables, initializing the menu.
@@ -41,7 +49,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
             $this->search = $this->request->getArgument('search');
         }
 
-    
+
         if (isset($this->search['table'])) {
             $activeTable = $this->search['table'];
             if (!isset($this->slugTables[$activeTable])) {
@@ -64,7 +72,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->slugsUtility->setTable($this->slugTable['table']);
         $this->slugsUtility->setSlugFieldName($this->slugTable['slugFieldName']);
         $this->slugsUtility->setSlugLockedFieldName($this->slugTable['slugLockedFieldName']);
-    
+
         // $BE_USER->check('tables_modify', 'pages');
         //$BE_USER->check('non_exclude_fields', this->table . ':' . $this->fieldName);
     }
@@ -79,12 +87,12 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->moduleTemplate->getPageRenderer()->loadRequireJsModule('TYPO3/CMS/IgSlug/Confirm');
         $this->moduleTemplate->getPageRenderer()->addCssFile('EXT:ig_slug/Resources/Public/Css/ig_slug_be.css');
         $tableTitle = $this->slugTable['title'];
-      
+
         $filterMenus=$this->modMenu();
 
         $this->view->assign('filterMenus', $filterMenus);
         $this->view->assign('search', $this->search);
-      
+
         $fields = $this->slugsUtility->getSlugFields();
         $this->slugsUtility->setFieldNamesToShow($fields);
         $this->view->assign('fields', $fields);
@@ -113,15 +121,15 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
             $pageUids=$this->slugsUtility->getPageRecordsRecursive($this->id, $this->depth, [$this->id]);
             $entries=$this->slugsUtility->viewSlugs($pageUids, $this->lang);
         }
-      
+
         $this->view->assign('entries', $entries);
         $this->view->assign('slugTables', $this->slugTables);
         $this->view->assign('activeTable', $this->activeTable);
-      
+
         $this->view->assign('pageUid', $this->id);
         return $this->view->render();
     }
-    
+
     /*
      * Action: list
      *
@@ -135,7 +143,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $filterMenus=$this->modMenu();
         $this->view->assign('filterMenus', $filterMenus);
         $this->view->assign('search', $this->search);
-    
+
         $fields=$this->slugsUtility->getSlugFields();
         $this->slugsUtility->setFieldNamesToShow($fields);
         $this->view->assign('fields', $fields);
@@ -146,14 +154,14 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
             $pageUids=$this->slugsUtility->getPageRecordsRecursive($this->id, $this->depth, [$this->id]);
             $entries=$this->slugsUtility->viewSlugs($pageUids, $this->lang);
         }
-    
+
         $this->view->assign('entries', $entries);
         $this->view->assign('slugTables', $this->slugTables);
         $this->view->assign('activeTable', $this->activeTable);
         $this->view->assign('pageUid', $this->id);
     }
 
-      
+
     /*
      * Action: update
      *
@@ -192,7 +200,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
                 1 => $lang->sL('LLL:EXT:ig_slug/Resources/Private/Language/locallang.xlf:igSlug.changes'),
 
             ]
-        
+
         ];
         // Languages:
         $menuArray['lang'] = [];
@@ -205,7 +213,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
             $menuArray['partialListEntries'] = 'ListEntries';
         } else {
             $menuArray['partialFilter'] = 'Compatibility10/Filters';
-            $menuArray['partialListEntries'] = 'Compatibility10/ListEntries';            
+            $menuArray['partialListEntries'] = 'Compatibility10/ListEntries';
         }
         return $menuArray;
     }
@@ -231,7 +239,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         return $view;
     }
 
- 
+
     /**
      * Since the AbstractFunctionModule cannot access the current request yet, we'll do it "old school"
      * to fetch the Site based on the current ID.
@@ -242,7 +250,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $currentSite = $GLOBALS['TYPO3_REQUEST']->getAttribute('site');
         $this->siteLanguages = $currentSite->getAvailableLanguages($this->getBackendUser(), false, (int)$this->id);
     }
- 
+
 
     /**
      * @return BackendUserAuthentication

@@ -23,7 +23,8 @@ class SlugUtility
     protected $hasToBeUniqueInPid;
     protected $hasToBeUniqueInTable;
     protected $fieldNamesToShow;
-  
+    protected $flags;
+
     /**
      * Instantiate the form protection before a simulated user is initialized.
      *
@@ -77,7 +78,7 @@ class SlugUtility
             $slug=$record[$this->slugFieldName];
         } else {
             $slug = $this->slugHelper->generate($record, $pid);
-        
+
             $state = RecordStateFactory::forName($this->table)->fromArray($record, $pid, $recordId);
             if ($this->hasToBeUniqueInSite && !$this->slugHelper->isUniqueInSite($slug, $state)) {
                 $slug = $this->slugHelper->buildSlugForUniqueInSite($slug, $state);
@@ -133,7 +134,7 @@ class SlugUtility
             /*
              */
         }
-    
+
         foreach ($this->fieldNamesToShow as $fieldName) {
             if ($entry['slugFieldValues'] &&  $record[$fieldName]) {
                 $entry['slugFieldValues'] .= ', ';
@@ -162,7 +163,7 @@ class SlugUtility
         $runtimeCache->set('backendUtilityPageForRootLine', []);
         $runtimeCache->set('backendUtilityBeGetRootLine', []);
     }
-  
+
     protected function getLiveVersionPid($t3ver_oid)
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
